@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Product } from "@/types/product";
-import { getProducts } from "@/services/api";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
     ColumnDef,
@@ -19,30 +20,76 @@ import {
     Column,
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ProductModal } from "@/components/product-modal";
+import { useProducts } from "@/hooks/useProducts";
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState<Product[]>([]);
+    const router = useRouter();
+    const { 
+        products, 
+        isLoading, 
+        error, 
+        fetchProducts, 
+        createProduct, 
+        updateProduct, 
+        deleteProduct 
+    } = useProducts();
+    
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 
-    // Log quando os produtos são atualizados
     useEffect(() => {
-        console.log('Produtos:', products);
-    }, [products]);
+        fetchProducts();
+    }, [fetchProducts]);
 
-    // Log quando o estado da tabela muda
-    useEffect(() => {
-        console.log('Estado da tabela:', {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection
-        });
-    }, [sorting, columnFilters, columnVisibility, rowSelection]);
+    const handleSave = async (data: any) => {
+        try {
+            if (modalMode === 'create') {
+                await createProduct(data);
+            } else if (modalMode === 'edit' && selectedProduct) {
+                await updateProduct(selectedProduct.id, data);
+            }
+        } catch (error) {
+            console.error('Erro ao salvar produto:', error);
+            // Adicionar alert aqui
+        }
+    };
+
+    const handleEdit = (product: Product) => {
+        setSelectedProduct(product);
+        setModalMode('edit');
+        setIsModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setSelectedProduct(undefined);
+        setModalMode('create');
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: number) => {
+        // Adicionar alert aqui
+        if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+            try {
+                await deleteProduct(id);
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error);
+                // ADicionar alert
+            }
+        }
+    };
 
     const columns: ColumnDef<Product>[] = [
         {
@@ -95,6 +142,7 @@ export default function ProductsPage() {
                             variant="outline" 
                             size="sm" 
                             className="hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            onClick={() => handleEdit(product)}
                         >
                             Editar
                         </Button>
@@ -102,6 +150,7 @@ export default function ProductsPage() {
                             variant="destructive" 
                             size="sm"
                             className="hover:bg-red-50 hover:text-red-600 transition-colors"
+                            onClick={() => handleDelete(product.id)}
                         >
                             Excluir
                         </Button>
@@ -130,14 +179,13 @@ export default function ProductsPage() {
         },
     });
 
-    async function fetchProducts() {
-        const data = await getProducts();
-        setProducts(data);
+    if (isLoading) {
+        return <div>Carregando...</div>;
     }
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+    if (error) {
+        return <div>Erro: {error.message}</div>;
+    }
 
     return (
         <div className="container mx-auto py-10 px-4">
@@ -148,10 +196,47 @@ export default function ProductsPage() {
                         <ThemeToggle />
                         <Button
                             className="bg-blue-600 hover:bg-blue-700 transition-colors"
+                            onClick={handleCreate}
                         >
                             Novo Produto
                         </Button>
                     </div>
+                </div>
+                <div className="flex items-center py-4">
+                    <Input
+                        placeholder="Buscar produtos..."
+                        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                        onChange={(event) =>
+                            table.getColumn("name")?.setFilterValue(event.target.value)
+                        }
+                        className="max-w-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="ml-auto">
+                                Colunas <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            {table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())
+                                .map((column) => {
+                                    return (
+                                        <DropdownMenuCheckboxItem
+                                            key={column.id}
+                                            className="capitalize"
+                                            checked={column.getIsVisible()}
+                                            onCheckedChange={(value: boolean) =>
+                                                column.toggleVisibility(!!value)
+                                            }
+                                        >
+                                            {column.id}
+                                        </DropdownMenuCheckboxItem>
+                                    );
+                                })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <Table>
@@ -223,6 +308,13 @@ export default function ProductsPage() {
                     </div>
                 </div>
             </div>
+            <ProductModal 
+                open={isModalOpen} 
+                onOpenChange={setIsModalOpen}
+                onSave={handleSave}
+                product={selectedProduct}
+                mode={modalMode}
+            />
         </div>
     );
 }
