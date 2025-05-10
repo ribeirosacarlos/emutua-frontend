@@ -12,9 +12,10 @@ export function useProducts() {
             setIsLoading(true);
             setError(null);
             const data = await productService.getAll();
-            setProducts(data);
+            setProducts(data || []);
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Erro ao carregar produtos'));
+            setProducts([]);
         } finally {
             setIsLoading(false);
         }
@@ -35,7 +36,7 @@ export function useProducts() {
         }
     }, []);
 
-    const updateProduct = useCallback(async (id: number, product: Partial<Product>) => {
+    const updateProduct = useCallback(async (id: string, product: Partial<Product>) => {
         try {
             setIsLoading(true);
             setError(null);
@@ -50,7 +51,7 @@ export function useProducts() {
         }
     }, []);
 
-    const deleteProduct = useCallback(async (id: number) => {
+    const deleteProduct = useCallback(async (id: string) => {
         try {
             setIsLoading(true);
             setError(null);
