@@ -60,8 +60,6 @@ export function ProductModal({
         onSave({
             ...formData
         });
-        setFormData({ name: "", description: "", price: "", category: "" });
-        onOpenChange(false);
     };
 
     return (

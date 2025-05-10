@@ -9,15 +9,15 @@ export const productService = {
 
     async create(product: Omit<Product, 'id'>): Promise<Product> {
         const response = await api.post('/products', product);
-        return response.data;
+        return response.data.data;
     },
 
-    async update(id: number, product: Partial<Product>): Promise<Product> {
+    async update(id: string, product: Partial<Product>): Promise<Product> {
         const response = await api.put(`/products/${id}`, product);
-        return response.data;
+        return response.data.data;
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id: string): Promise<void> {
         await api.delete(`/products/${id}`);
     }
 }; 
