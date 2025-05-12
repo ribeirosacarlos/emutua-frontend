@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# eMutua Digital - Frontend Produtos
 
-## Getting Started
+Este repositório contém o frontend do teste técnico para a plataforma de e-commerce da eMutua Digital, desenvolvido em Next.js, React e Shadcn/ui.
 
-First, run the development server:
+### Tecnologias Utilizadas
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+O projeto utiliza **Next.js** (React) para aproveitar renderização SSR, roteamento otimizado e melhor performance, além de **Shadcn/ui** para componentes acessíveis e customizáveis, acelerando o desenvolvimento com visual moderno. O uso de **TypeScript** garante maior segurança e produtividade no código.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Funcionalidades
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- CRUD de produtos (criar, listar, editar, excluir)
+- Busca e filtro de produtos
+- Validação de formulários
+- Interface responsiva e feedback visual
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Como rodar o projeto
 
-## Learn More
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/emutua-frontend.git
+   cd emutua-frontend
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. Instale as dependências:
+   ```bash
+   npm install
+   # ou
+   yarn install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Configure as variáveis de ambiente criando um arquivo `.env.local`:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:8000/api
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   # ou
+   yarn dev
+   ```
 
-## Deploy on Vercel
+O frontend estará disponível em `http://localhost:3000` e já estará pronto para consumir o backend (Laravel) conforme as rotas especificadas.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Observações
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- O backend (Laravel + Doctrine) está em outro repositório `https://github.com/ribeirosacarlos/emutua-backend`.
+- O frontend consome as rotas REST do backend para todas as operações de produto.
+- Caso queira customizar endpoints, ajuste a variável `NEXT_PUBLIC_API_URL`.
