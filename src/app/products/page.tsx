@@ -151,7 +151,17 @@ export default function ProductsPage() {
         },
         {
             accessorKey: "description",
-            header: "Descrição",
+            header: ({ column }: { column: Column<Product> }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
+                    >
+                        Descrição
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            }
         },
         {
             accessorKey: "price",
@@ -184,6 +194,7 @@ export default function ProductsPage() {
         },
         {
             id: "actions",
+            header: "Ações",
             cell: ({ row }: { row: any }) => {
                 const product = row.original;
                 return (
